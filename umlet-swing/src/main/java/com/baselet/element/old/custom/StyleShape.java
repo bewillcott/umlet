@@ -1,9 +1,8 @@
 package com.baselet.element.old.custom;
 
+import com.baselet.control.enums.LineType;
 import java.awt.Color;
 import java.awt.Shape;
-
-import com.baselet.control.enums.LineType;
 
 /**
  * Extended shape which supports the stroketype and the line thickness

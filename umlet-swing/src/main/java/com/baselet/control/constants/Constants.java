@@ -1,16 +1,14 @@
 package com.baselet.control.constants;
 
+import com.baselet.control.enums.Program;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-
-import com.baselet.control.enums.Program;
 
 public abstract class Constants extends SharedConstants {
 
