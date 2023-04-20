@@ -51,7 +51,7 @@ public class Relation extends NewGridElement implements Stickable, RelationPoint
         }
         if (undoable)
         {
-            undoStack.add(new UndoInformation(getRectangle(), oldRect, new HashMap<Stickable, List<PointChange>>(), getGridSize(), oldAddAttr, getAdditionalAttributes()));
+            undoStack.add(new UndoInformation(getRectangle(), oldRect, new HashMap<>(), getGridSize(), oldAddAttr, getAdditionalAttributes()));
         }
     }
 
@@ -120,7 +120,7 @@ public class Relation extends NewGridElement implements Stickable, RelationPoint
     @Override
     public Set<Direction> getResizeArea(int x, int y)
     {
-        return new HashSet<Direction>();
+        return new HashSet<>();
     }
 
     @Override

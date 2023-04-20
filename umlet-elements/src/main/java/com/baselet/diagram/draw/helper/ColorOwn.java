@@ -8,38 +8,17 @@ public class ColorOwn
 {
     private static final Logger log = LoggerFactory.getLogger(ColorOwn.class);
 
-    public static enum Transparency
-    {
-        FOREGROUND(255),
-        FULL_TRANSPARENT(0),
-        DEPRECATED_WARNING(175),
-        BACKGROUND(125),
-        SELECTION_BACKGROUND(20);
-
-        private final int alpha;
-
-        private Transparency(int alpha)
-        {
-            this.alpha = alpha;
-        }
-
-        public int getAlpha()
-        {
-            return alpha;
-        }
-    }
-
     /*
      * fields should be final to avoid changing parts of existing color object
      * (otherwise unexpected visible changes can happen)
      */
-    protected final int red;
-
-    protected final int green;
+    protected final int alpha;
 
     protected final int blue;
 
-    protected final int alpha;
+    protected final int green;
+
+    protected final int red;
 
     public ColorOwn(int red, int green, int blue, Transparency transparency)
     {
@@ -68,51 +47,9 @@ public class ColorOwn
         this(0, 0, 0, 0);
     }
 
-    public int getRed()
-    {
-        return red;
-    }
-
-    public int getGreen()
-    {
-        return green;
-    }
-
-    public int getBlue()
-    {
-        return blue;
-    }
-
-    public int getAlpha()
-    {
-        return alpha;
-    }
-
-    public ColorOwn transparency(Transparency transparency)
-    {
-        return transparency(transparency.getAlpha());
-    }
-
-    public ColorOwn transparency(int alpha)
-    {
-        return new ColorOwn(getRed(), getGreen(), getBlue(), alpha);
-    }
-
     public ColorOwn darken(int factor)
     {
         return new ColorOwn(Math.max(0, getRed() - factor), Math.max(0, getGreen() - factor), Math.max(0, getBlue() - factor), getAlpha());
-    }
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + alpha;
-        result = prime * result + blue;
-        result = prime * result + green;
-        result = prime * result + red;
-        return result;
     }
 
     @Override
@@ -150,9 +87,72 @@ public class ColorOwn
         return true;
     }
 
+    public int getAlpha()
+    {
+        return alpha;
+    }
+
+    public int getBlue()
+    {
+        return blue;
+    }
+
+    public int getGreen()
+    {
+        return green;
+    }
+
+    public int getRed()
+    {
+        return red;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + alpha;
+        result = prime * result + blue;
+        result = prime * result + green;
+        result = prime * result + red;
+        return result;
+    }
+
     @Override
     public String toString()
     {
         return "ColorOwn [red=" + red + ", green=" + green + ", blue=" + blue + ", alpha=" + alpha + "]";
+    }
+
+    public ColorOwn transparency(Transparency transparency)
+    {
+        return transparency(transparency.getAlpha());
+    }
+
+    public ColorOwn transparency(int alpha)
+    {
+        return new ColorOwn(getRed(), getGreen(), getBlue(), alpha);
+    }
+
+    public static enum Transparency
+    {
+        FOREGROUND(255),
+        FULL_TRANSPARENT(0),
+        DEPRECATED_WARNING(175),
+        BACKGROUND(125),
+        SELECTION_BACKGROUND(20);
+
+        private final int alpha;
+
+        private Transparency(int alpha)
+        {
+            this.alpha = alpha;
+        }
+
+        public int getAlpha()
+        {
+            return alpha;
+        }
     }
 }

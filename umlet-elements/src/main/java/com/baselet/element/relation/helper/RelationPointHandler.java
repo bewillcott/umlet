@@ -14,7 +14,7 @@ import java.util.*;
 public class RelationPointHandler implements ResizableObject
 {
 
-    /**
+    /*
      * Points of this relation (point of origin is the upper left corner of the
      * relation element (not the drawpanel!))
      */
@@ -127,7 +127,7 @@ public class RelationPointHandler implements ResizableObject
         }
     }
 
-    /**
+    /*
      * this method is basically the same as {@link #getSelection(Point)}, but
      * also applies changes to the relationpoints
      * (the order of checks is the same, but they do different things, therefore
@@ -173,7 +173,7 @@ public class RelationPointHandler implements ResizableObject
     {
         points.applyChangesToPoints(changedPoints);
         resizeRectAndReposPoints();
-        List<PointDoubleIndexed> updatedChangedPoint = new ArrayList<PointDoubleIndexed>();
+        List<PointDoubleIndexed> updatedChangedPoint = new ArrayList<>();
         for (PointChange c : changedPoints)
         {
             updatedChangedPoint.add(points.get(c.getIndex()));
@@ -192,13 +192,13 @@ public class RelationPointHandler implements ResizableObject
         points.setSize(index, RelationPoint.DEFAULT_SIZE);
     }
 
-    /**
+    /*
      * resets all textbox indexes except those which are contained in the
      * excludedList
      */
     public void resetTextBoxIndexesExcept(Set<Integer> excludedList)
     {
-        Set<Integer> unusedTextBoxIndexes = new HashSet<Integer>(points.getTextBoxIndexes());
+        Set<Integer> unusedTextBoxIndexes = new HashSet<>(points.getTextBoxIndexes());
         unusedTextBoxIndexes.removeAll(excludedList);
         for (Integer index : unusedTextBoxIndexes)
         {
@@ -219,8 +219,8 @@ public class RelationPointHandler implements ResizableObject
     @Override
     public void setPointMinSize(int index, Rectangle size)
     {
-        size = SharedUtils.realignToGrid(size, true);
-        points.setSize(index, size);
+        Rectangle size1 = SharedUtils.realignToGrid(size, true);
+        points.setSize(index, size1);
     }
 
     public void setTextBox(int index, Rectangle size)
@@ -248,5 +248,4 @@ public class RelationPointHandler implements ResizableObject
     {
         return movePointAndResizeRectangle(Arrays.asList(new PointChange(point.getIndex(), diffX, diffY))).get(0);
     }
-
 }

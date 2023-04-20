@@ -5,9 +5,12 @@ import com.baselet.control.enums.FormatLabels;
 import com.baselet.diagram.draw.helper.StyleException;
 import com.baselet.gui.AutocompletionText;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class KeyValueFacet extends Facet
 {
+    private Logger log = LoggerFactory.getLogger(KeyValueFacet.class);
 
     public static final String SEP = "=";
 
