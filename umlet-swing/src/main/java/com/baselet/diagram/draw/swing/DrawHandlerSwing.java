@@ -82,8 +82,8 @@ public class DrawHandlerSwing extends DrawHandler
             for (int i = 0; i < points.length; i++)
             {
                 PointDouble p = points[i];
-                Double x = inBorderHorizontal(Double.valueOf(p.getX() * getZoom() + HALF_PX), 0);
-                Double y = inBorderVertical(Double.valueOf(p.getY() * getZoom() + HALF_PX), 0);
+                Double x = inBorderHorizontal(p.getX() * getZoom() + HALF_PX, 0);
+                Double y = inBorderVertical(p.getY() * getZoom() + HALF_PX, 0);
                 if (first)
                 {
                     path.moveTo(x, y);

@@ -181,6 +181,16 @@ abstract class ArrowEnd implements RegexValueHolder {
 		}
 	};
 
+	static ArrowEnd RIGHT_OWNED = new ArrowEnd(">o") {
+		@Override
+		public void print(DrawHandler drawer, Line lineToDraw, boolean drawOnLineStart, String matchedText, ResizableObject resizableObject) {
+			PointDouble point = lineToDraw.getPointOnLineWithDistanceFrom(drawOnLineStart, RelationPointConstants.POINT_SELECTION_RADIUS * 2);
+			RelationDrawer.drawCircle(point, RelationDrawer.SMALL_CIRCLE_RADIUS, drawer, lineToDraw, drawOnLineStart, resizableObject, null, false);
+			RelationDrawer.drawArrowToLine(drawer, lineToDraw, drawOnLineStart, ArrowEndType.NORMAL, false, true);
+		}
+	};
+
+
 	static ArrowEnd RIGHT_ONE_TO_MANY = new ArrowEnd("\\|<") {
 		@Override
 		public void print(DrawHandler drawer, Line lineToDraw, boolean drawOnLineStart, String matchedText, ResizableObject resizableObject) {

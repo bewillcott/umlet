@@ -3,7 +3,7 @@
 
     <groupId>com.umlet</groupId>
     <artifactId>umlet-parent</artifactId>
-    <version>15.2.0-SNAPSHOT</version>
+    <version>15.2.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://www.umlet.com/</url>
 

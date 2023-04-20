@@ -1,22 +1,5 @@
 package com.baselet.element.old.custom;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.baselet.control.config.Config;
 import com.baselet.control.config.SharedConfig;
 import com.baselet.control.constants.Constants;
@@ -26,6 +9,14 @@ import com.baselet.control.util.Path;
 import com.baselet.custom.CompileError;
 import com.baselet.element.interfaces.GridElement;
 import com.baselet.element.old.element.ErrorOccurred;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CustomElementCompiler {
 
@@ -87,7 +78,7 @@ public class CustomElementCompiler {
 		try {
 			StringWriter compilerErrorMessageSW = new StringWriter(); // catch compiler messages
 			PrintWriter compilerErrorMessagePW = new PrintWriter(compilerErrorMessageSW);
-			String javaVersion = "-\"1.6\""; // custom elements use Java6 (previously SystemInfo.JAVA_VERSION, but this only works if the compiler.jar supports the system java version which is not guaranteed)
+			String javaVersion = "-\"1.8\""; // custom elements use Java8 (previously SystemInfo.JAVA_VERSION, but this only works if the compiler.jar supports the system java version which is not guaranteed)
 			String classpath = "-classpath \"" + createClasspath() + "\"";
 			String sourcefile = "\"" + this.sourcefile.getAbsolutePath() + "\"";
 

@@ -1,5 +1,10 @@
 package com.baselet.control.util;
 
+import com.baselet.control.basics.geom.Point;
+import com.baselet.control.constants.Constants;
+import com.baselet.control.constants.FacetConstants;
+import com.baselet.control.enums.LineType;
+import com.baselet.diagram.draw.DoubleStroke;
 import java.awt.BasicStroke;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
@@ -9,12 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
-
-import com.baselet.control.basics.geom.Point;
-import com.baselet.control.constants.Constants;
-import com.baselet.control.constants.FacetConstants;
-import com.baselet.control.enums.LineType;
-import com.baselet.diagram.draw.DoubleStroke;
 
 public abstract class Utils {
 
@@ -50,15 +49,13 @@ public abstract class Utils {
 
 	// TODO: Decomposing should be moved to Properties.class. At the moment OldGridElement uses this method and NewGridElement the one in Properties.class
 	private static Vector<String> decomposeStringsWFilter(String fullString, String delimiter, boolean filterComments, boolean filterNewLines) {
-		Vector<String> returnVector = new Vector<String>();
+		Vector<String> returnVector = new Vector<>();
 		String compatibleFullString = fullString.replaceAll("\r\n", delimiter); // compatibility to windows \r\n
 
 		for (String line : compatibleFullString.split("\\" + delimiter)) {
 			if (filterComments && line.matches("((//)|(fg=)|(bg=)|(autoresize=)|(layer=)|(group=)).*")) {
-				continue;
 			}
 			else if (filterNewLines && line.isEmpty()) {
-				continue;
 			}
 			else {
 				returnVector.add(line);
@@ -115,7 +112,7 @@ public abstract class Utils {
 	}
 
 	public static Map<RenderingHints.Key, Object> getUxRenderingQualityHigh(boolean subpixelRendering) {
-		HashMap<RenderingHints.Key, Object> renderingHints = new HashMap<RenderingHints.Key, Object>();
+		HashMap<RenderingHints.Key, Object> renderingHints = new HashMap<>();
 		renderingHints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 		renderingHints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		renderingHints.put(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
@@ -156,8 +153,8 @@ public abstract class Utils {
 	}
 
 	/**
-	 * eg: createDoubleArrayFromTo(5, 6, 0.1) = [5, 5.1, 5.2, ..., 5.9, 6] <br/>
-	 * eg: createDoubleArrayFromTo(10, 20, 3) = [10, 13, 16, 19, 22] <br/>
+	 * eg: createDoubleArrayFromTo(5, 6, 0.1) = [5, 5.1, 5.2, ..., 5.9, 6] <br>
+	 * eg: createDoubleArrayFromTo(10, 20, 3) = [10, 13, 16, 19, 22] <br>
 	 *
 	 * @param min	first value of the result array
 	 * @param max	if this value is reached (or passed if it's not dividable through "step") the array is finished

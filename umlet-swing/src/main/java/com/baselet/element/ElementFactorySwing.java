@@ -1,10 +1,5 @@
 package com.baselet.element;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import com.baselet.control.HandlerElementMap;
 import com.baselet.control.basics.geom.Rectangle;
 import com.baselet.control.enums.ElementId;
@@ -16,10 +11,14 @@ import com.baselet.element.old.OldGridElement;
 import com.baselet.element.relation.Relation;
 import com.baselet.element.sticking.StickableMap;
 import com.baselet.element.sticking.Stickables;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class ElementFactorySwing extends ElementFactory {
 
-	/**
+	/*
 	 * uses no reflection, to avoid complications with GWT
 	 */
 	public static NewGridElement create(ElementId id, Rectangle bounds, String panelAttributes, String additionalAttributes, DiagramHandler handler) {

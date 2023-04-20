@@ -1,10 +1,5 @@
-package com.baselet.element.relation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+package com.baselet.element.relation;
 
 import com.baselet.control.basics.geom.Point;
 import com.baselet.control.basics.geom.Rectangle;
@@ -33,155 +28,186 @@ import com.baselet.element.sticking.PointDoubleIndexed;
 import com.baselet.element.sticking.Stickable;
 import com.baselet.element.sticking.StickableMap;
 import com.baselet.element.sticking.polygon.NoStickingPolygonGenerator;
+import java.util.*;
 
-public class Relation extends NewGridElement implements Stickable, RelationPointHolder {
+public class Relation extends NewGridElement implements Stickable, RelationPointHolder
+{
 
-	private RelationPointHandler relationPoints;
+    private RelationPointHandler relationPoints;
 
-	@Override
-	public ElementId getId() {
-		return ElementId.Relation;
-	}
+    @Override
+    public void drag(Collection<Direction> resizeDirection, int diffX, int diffY, Point mousePosBeforeDragRelative, boolean isShiftKeyDown, boolean firstDrag, StickableMap stickables, boolean undoable)
+    {
+        String oldAddAttr = getAdditionalAttributes();
+        Rectangle oldRect = getRectangle();
+        RelationSelection returnSelection = relationPoints.getSelectionAndMovePointsIfNecessary(pointAtDefaultZoom(mousePosBeforeDragRelative), toDefaultZoom(diffX), toDefaultZoom(diffY), firstDrag);
+        if (returnSelection == RelationSelection.DRAG_BOX)
+        {
+            setLocationDifference(diffX, diffY);
+        }
+        if (returnSelection != RelationSelection.NOTHING)
+        {
+            updateModelFromText();
+        }
+        if (undoable)
+        {
+            undoStack.add(new UndoInformation(getRectangle(), oldRect, new HashMap<Stickable, List<PointChange>>(), getGridSize(), oldAddAttr, getAdditionalAttributes()));
+        }
+    }
 
-	@Override
-	protected void drawCommonContent(PropertiesParserState state) {
-		state.setStickingPolygonGenerator(NoStickingPolygonGenerator.INSTANCE);
-	}
+    @Override
+    public void dragEnd()
+    {
+        boolean updateNecessary = relationPoints.removeRelationPointIfOnLineBetweenNeighbourPoints();
+        if (updateNecessary)
+        {
+            updateModelFromText();
+        }
+    }
 
-	@Override
-	protected void resetAndDrawMetaDrawerContent(DrawHandler drawer) {
-		Theme currentTheme = ThemeFactory.getCurrentTheme();
-		drawer.clearCache();
-		drawer.setBackgroundColor(currentTheme.getColor(Theme.ColorStyle.SELECTION_BG));
+    @Override
+    public String getAdditionalAttributes()
+    {
+        return relationPoints.toAdditionalAttributesString();
+    }
 
-		// draw rectangle around whole element (basically a helper for developers to make sure the (invisible) size of the element is correct)
-		if (SharedConfig.getInstance().isDev_mode()) {
-			drawer.setForegroundColor(currentTheme.getColor(Theme.PredefinedColors.TRANSPARENT));
-			drawer.drawRectangle(0, 0, getRealSize().getWidth(), getRealSize().getHeight());
-			drawer.setBackgroundColor(currentTheme.getColor(Theme.PredefinedColors.GREEN).transparency(Transparency.BACKGROUND));
-			relationPoints.drawSelectionSpace(drawer);
-		}
+    @Override
+    public void setAdditionalAttributes(String additionalAttributes)
+    {
+        super.setAdditionalAttributes(additionalAttributes);
+        RelationPointList pointList = new RelationPointList();
+        String[] split = additionalAttributes.split(";");
+        for (int i = 0; i < split.length; i += 2)
+        {
+            pointList.add(Double.parseDouble(split[i]), Double.parseDouble(split[i + 1]));
+        }
+        relationPoints = new RelationPointHandler(this, pointList);
+        if (getHandler().isInitialized())
+        {
+            relationPoints.resizeRectAndReposPoints();
+        }
+    }
 
-		drawer.setForegroundColor(currentTheme.getColor(Theme.ColorStyle.SELECTION_FG));
-		relationPoints.drawCirclesAndDragBox(drawer);
-	}
+    @Override
+    public CursorOwn getCursor(Point point, Set<Direction> resizeDirections)
+    {
+        RelationSelection selection = relationPoints.getSelection(pointAtDefaultZoom(toRelative(point)));
+        switch (selection)
+        {
+            case DRAG_BOX:
+                return CursorOwn.MOVE;
+            case LINE:
+                return CursorOwn.CROSS;
+            case RELATION_POINT:
+                return CursorOwn.HAND;
+            default:
+                return super.getCursor(point, resizeDirections);
+        }
+    }
 
-	@Override
-	public void setAdditionalAttributes(String additionalAttributes) {
-		super.setAdditionalAttributes(additionalAttributes);
-		RelationPointList pointList = new RelationPointList();
-		String[] split = additionalAttributes.split(";");
-		for (int i = 0; i < split.length; i += 2) {
-			pointList.add(Double.parseDouble(split[i]), Double.parseDouble(split[i + 1]));
-		}
-		relationPoints = new RelationPointHandler(this, pointList);
-		if (getHandler().isInitialized()) {
-			relationPoints.resizeRectAndReposPoints();
-		}
-	}
+    @Override
+    public ElementId getId()
+    {
+        return ElementId.Relation;
+    }
 
-	@Override
-	public String getAdditionalAttributes() {
-		return relationPoints.toAdditionalAttributesString();
-	}
+    @Override
+    public Integer getLayer()
+    {
+        return state.getFacetResponse(LayerFacet.class, LayerFacet.DEFAULT_VALUE_RELATION);
+    }
 
-	@Override
-	public void drag(Collection<Direction> resizeDirection, int diffX, int diffY, Point mousePosBeforeDragRelative, boolean isShiftKeyDown, boolean firstDrag, StickableMap stickables, boolean undoable) {
-		String oldAddAttr = getAdditionalAttributes();
-		Rectangle oldRect = getRectangle();
-		RelationSelection returnSelection = relationPoints.getSelectionAndMovePointsIfNecessary(pointAtDefaultZoom(mousePosBeforeDragRelative), toDefaultZoom(diffX), toDefaultZoom(diffY), firstDrag);
-		if (returnSelection == RelationSelection.DRAG_BOX) {
-			setLocationDifference(diffX, diffY);
-		}
-		if (returnSelection != RelationSelection.NOTHING) {
-			updateModelFromText();
-		}
-		if (undoable) {
-			undoStack.add(new UndoInformation(getRectangle(), oldRect, new HashMap<Stickable, List<PointChange>>(), getGridSize(), oldAddAttr, getAdditionalAttributes()));
-		}
-	}
+    @Override
+    public Set<Direction> getResizeArea(int x, int y)
+    {
+        return new HashSet<Direction>();
+    }
 
-	/**
-	 * Calculate the point for DEFAULT_ZOOM to allow ignoring zoom-level from now on
-	 */
-	private Point pointAtDefaultZoom(Point p) {
-		return new Point(toDefaultZoom(p.getX()), toDefaultZoom(p.getY()));
-	}
+    @Override
+    public Collection<PointDoubleIndexed> getStickablePoints()
+    {
+        return relationPoints.getStickablePoints();
+    }
 
-	private int toDefaultZoom(int input) {
-		return input * SharedConstants.DEFAULT_GRID_SIZE / getGridSize();
-	}
+    @Override
+    public boolean isSelectableOn(Point point)
+    {
+        Point relativePoint = toRelative(point);
+        boolean isSelectableOn = relationPoints.getSelection(pointAtDefaultZoom(relativePoint)) != RelationSelection.NOTHING;
+        return isSelectableOn;
+    }
 
-	@Override
-	public void dragEnd() {
-		boolean updateNecessary = relationPoints.removeRelationPointIfOnLineBetweenNeighbourPoints();
-		if (updateNecessary) {
-			updateModelFromText();
-		}
-	}
+    @Override
+    public List<PointDoubleIndexed> movePoints(List<PointChange> changedStickPoints)
+    {
+        List<PointDoubleIndexed> updatedChangedList = relationPoints.movePointAndResizeRectangle(changedStickPoints);
+        updateModelFromText();
+        return updatedChangedList;
+    }
 
-	@Override
-	public Set<Direction> getResizeArea(int x, int y) {
-		return new HashSet<Direction>();
-	}
+    /**
+     * Calculate the point for DEFAULT_ZOOM to allow ignoring zoom-level from
+     * now on
+     */
+    private Point pointAtDefaultZoom(Point p)
+    {
+        return new Point(toDefaultZoom(p.getX()), toDefaultZoom(p.getY()));
+    }
 
-	@Override
-	public boolean isSelectableOn(Point point) {
-		Point relativePoint = toRelative(point);
-		boolean isSelectableOn = relationPoints.getSelection(pointAtDefaultZoom(relativePoint)) != RelationSelection.NOTHING;
-		return isSelectableOn;
-	}
+    private int toDefaultZoom(int input)
+    {
+        return input * SharedConstants.DEFAULT_GRID_SIZE / getGridSize();
+    }
 
-	@Override
-	public Collection<PointDoubleIndexed> getStickablePoints() {
-		return relationPoints.getStickablePoints();
-	}
+    @Override
+    protected Settings createSettings()
+    {
+        return new SettingsRelation()
+        {
+            @Override
+            public RelationPointHandler getRelationPoints()
+            {
+                return relationPoints;
+            }
+        };
+    }
 
-	@Override
-	public List<PointDoubleIndexed> movePoints(List<PointChange> changedStickPoints) {
-		List<PointDoubleIndexed> updatedChangedList = relationPoints.movePointAndResizeRectangle(changedStickPoints);
-		updateModelFromText();
-		return updatedChangedList;
-	}
+    @Override
+    protected void drawCommonContent(PropertiesParserState state)
+    {
+        state.setStickingPolygonGenerator(NoStickingPolygonGenerator.INSTANCE);
+    }
 
-	@Override
-	public Integer getLayer() {
-		return state.getFacetResponse(LayerFacet.class, LayerFacet.DEFAULT_VALUE_RELATION);
-	}
+    @Override
+    protected void drawError(DrawHandler drawer, String errorText)
+    {
+        super.drawError(drawer, errorText.replace(">>", "\\>>").replace("<<", "\\<<"));
+        RelationLineTypeFacet.drawDefaultLineAndArrows(drawer, relationPoints);
+    }
 
-	@Override
-	protected Settings createSettings() {
-		return new SettingsRelation() {
-			@Override
-			public RelationPointHandler getRelationPoints() {
-				return relationPoints;
-			}
-		};
-	}
+    @Override
+    protected void resetAndDrawMetaDrawerContent(DrawHandler drawer)
+    {
+        Theme currentTheme = ThemeFactory.getCurrentTheme();
+        drawer.clearCache();
+        drawer.setBackgroundColor(currentTheme.getColor(Theme.ColorStyle.SELECTION_BG));
 
-	@Override
-	protected void drawError(DrawHandler drawer, String errorText) {
-		super.drawError(drawer, errorText.replace(">>", "\\>>").replace("<<", "\\<<"));
-		RelationLineTypeFacet.drawDefaultLineAndArrows(drawer, relationPoints);
-	}
+        // draw rectangle around whole element (basically a helper for developers to make sure the (invisible) size of the element is correct)
+        if (SharedConfig.getInstance().isDev_mode())
+        {
+            drawer.setForegroundColor(currentTheme.getColor(Theme.PredefinedColors.TRANSPARENT));
+            drawer.drawRectangle(0, 0, getRealSize().getWidth(), getRealSize().getHeight());
+            drawer.setBackgroundColor(currentTheme.getColor(Theme.PredefinedColors.GREEN).transparency(Transparency.BACKGROUND));
+            relationPoints.drawSelectionSpace(drawer);
+        }
 
-	protected Point toRelative(Point point) {
-		return new Point(point.getX() - getRectangle().getX(), point.getY() - getRectangle().getY());
-	}
+        drawer.setForegroundColor(currentTheme.getColor(Theme.ColorStyle.SELECTION_FG));
+        relationPoints.drawCirclesAndDragBox(drawer);
+    }
 
-	@Override
-	public CursorOwn getCursor(Point point, Set<Direction> resizeDirections) {
-		RelationSelection selection = relationPoints.getSelection(pointAtDefaultZoom(toRelative(point)));
-		switch (selection) {
-			case DRAG_BOX:
-				return CursorOwn.MOVE;
-			case LINE:
-				return CursorOwn.CROSS;
-			case RELATION_POINT:
-				return CursorOwn.HAND;
-			default:
-				return super.getCursor(point, resizeDirections);
-		}
-	}
+    protected Point toRelative(Point point)
+    {
+        return new Point(point.getX() - getRectangle().getX(), point.getY() - getRectangle().getY());
+    }
 
 }

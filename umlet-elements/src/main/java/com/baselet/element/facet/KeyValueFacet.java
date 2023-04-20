@@ -1,135 +1,164 @@
-package com.baselet.element.facet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+package com.baselet.element.facet;
 
 import com.baselet.control.enums.FormatLabels;
 import com.baselet.diagram.draw.helper.StyleException;
 import com.baselet.gui.AutocompletionText;
+import java.util.*;
 
-public abstract class KeyValueFacet extends Facet {
+public abstract class KeyValueFacet extends Facet
+{
 
-	public static class KeyValue {
-		private final String key;
-		private final boolean allValuesListed;
-		private final List<ValueInfo> valueInfos;
+    public static final String SEP = "=";
 
-		public KeyValue(String key, boolean allValuesListed, String value, String info) {
-			super();
-			this.key = key.toLowerCase(Locale.ENGLISH);
-			this.allValuesListed = allValuesListed;
-			valueInfos = Arrays.asList(new ValueInfo(value, info));
-		}
+    @Override
+    public boolean checkStart(String line, PropertiesParserState state)
+    {
+        return line.startsWith(getKeyWithSep());
+    }
 
-		public KeyValue(String key, List<ValueInfo> valueInfos) {
-			super();
-			this.key = key;
-			allValuesListed = true;
-			this.valueInfos = valueInfos;
-		}
+    @Override
+    public List<AutocompletionText> getAutocompletionStrings()
+    {
+        List<AutocompletionText> returnList = new ArrayList<>();
 
-		public KeyValue(String key, ValueInfo... valueInfos) {
-			this(key, Arrays.asList(valueInfos));
-		}
+        for (ValueInfo valueInfo : getKeyValue().getValueInfos())
+        {
+            returnList.add(new AutocompletionText(getKeyWithSep() + valueInfo.getValue().toString().toLowerCase(Locale.ENGLISH), valueInfo.getInfo(), valueInfo.getBase64Img()));
+        }
 
-		public String getKey() {
-			return key;
-		}
+        return returnList;
+    }
 
-		public List<ValueInfo> getValueInfos() {
-			return valueInfos;
-		}
+    public abstract KeyValue getKeyValue();
 
-		public String getValueString() {
-			StringBuilder sb = new StringBuilder();
-			if (allValuesListed) {
-				sb.append("Valid are: ");
-				for (ValueInfo vi : valueInfos) {
-					sb.append(vi.value.toString().toLowerCase(Locale.ENGLISH)).append(',');
-				}
-				sb.deleteCharAt(sb.length() - 1);
-			}
-			else {
-				for (ValueInfo vi : valueInfos) {
-					sb.append(vi.info);
-				}
-			}
-			return sb.toString();
-		}
-	}
+    public String getKeyWithSep()
+    {
+        return getKeyValue().getKey() + KeyValueFacet.SEP;
+    }
 
-	public static class ValueInfo {
-		private final Object value;
-		private final String info;
-		private final String base64Img;
+    @Override
+    public void handleLine(String line, PropertiesParserState state)
+    {
+        String value = extractValue(line);
+        
+        try
+        {
+            handleValue(value, state);
+        } catch (Exception e)
+        {
+            log.debug("KeyValue Error", e);
+            String errorMessage = getKeyValue().getValueString();
+            if (e instanceof StyleException)
+            { // self defined exceptions overwrite the default message
+                errorMessage = e.getMessage();
+            }
+            throw new RuntimeException(FormatLabels.BOLD.getValue() + "Invalid value:" + FormatLabels.BOLD.getValue() + "\n" + getKeyWithSep() + value + "\n" + errorMessage);
+        }
+    }
 
-		public ValueInfo(Object value, String info) {
-			this(value, info, null);
-		}
+    public abstract void handleValue(String value, PropertiesParserState state);
 
-		public ValueInfo(Object value, String info, String base64Img) {
-			super();
-			this.value = value;
-			this.info = info;
-			this.base64Img = base64Img;
-		}
+    protected String extractValue(String line)
+    {
+        return line.substring(getKeyWithSep().length());
+    }
 
-		public Object getValue() {
-			return value;
-		}
+    public static class KeyValue
+    {
+        private final String key;
 
-		private String getInfo() {
-			return info;
-		}
+        private final boolean allValuesListed;
 
-		private String getBase64Img() {
-			return base64Img;
-		}
+        private final List<ValueInfo> valueInfos;
 
-	}
+        public KeyValue(String key, boolean allValuesListed, String value, String info)
+        {
+            super();
+            this.key = key.toLowerCase(Locale.ENGLISH);
+            this.allValuesListed = allValuesListed;
+            valueInfos = Arrays.asList(new ValueInfo(value, info));
+        }
 
-	public static final String SEP = "=";
+        public KeyValue(String key, List<ValueInfo> valueInfos)
+        {
+            super();
+            this.key = key;
+            allValuesListed = true;
+            this.valueInfos = valueInfos;
+        }
 
-	public abstract KeyValue getKeyValue();
+        public KeyValue(String key, ValueInfo... valueInfos)
+        {
+            this(key, Arrays.asList(valueInfos));
+        }
 
-	public abstract void handleValue(String value, PropertiesParserState state);
+        public String getKey()
+        {
+            return key;
+        }
 
-	@Override
-	public boolean checkStart(String line, PropertiesParserState state) {
-		return line.startsWith(getKeyWithSep());
-	}
+        public List<ValueInfo> getValueInfos()
+        {
+            return Collections.unmodifiableList(valueInfos);
+        }
 
-	@Override
-	public void handleLine(String line, PropertiesParserState state) {
-		String value = extractValue(line);
-		try {
-			handleValue(value, state);
-		} catch (Exception e) {
-			log.debug("KeyValue Error", e);
-			String errorMessage = getKeyValue().getValueString();
-			if (e instanceof StyleException) { // self defined exceptions overwrite the default message
-				errorMessage = e.getMessage();
-			}
-			throw new RuntimeException(FormatLabels.BOLD.getValue() + "Invalid value:" + FormatLabels.BOLD.getValue() + "\n" + getKeyWithSep() + value + "\n" + errorMessage);
-		}
-	}
+        public String getValueString()
+        {
+            StringBuilder sb = new StringBuilder();
+            if (allValuesListed)
+            {
+                sb.append("Valid are: ");
+                for (ValueInfo vi : valueInfos)
+                {
+                    sb.append(vi.value.toString().toLowerCase(Locale.ENGLISH)).append(',');
+                }
+                sb.deleteCharAt(sb.length() - 1);
+            } else
+            {
+                for (ValueInfo vi : valueInfos)
+                {
+                    sb.append(vi.info);
+                }
+            }
+            return sb.toString();
+        }
+    }
 
-	protected String extractValue(String line) {
-		return line.substring(getKeyWithSep().length());
-	}
+    public static class ValueInfo
+    {
+        private final Object value;
 
-	@Override
-	public List<AutocompletionText> getAutocompletionStrings() {
-		List<AutocompletionText> returnList = new ArrayList<AutocompletionText>();
-		for (ValueInfo valueInfo : getKeyValue().getValueInfos()) {
-			returnList.add(new AutocompletionText(getKeyWithSep() + valueInfo.getValue().toString().toLowerCase(Locale.ENGLISH), valueInfo.getInfo(), valueInfo.getBase64Img()));
-		}
-		return returnList;
-	}
+        private final String info;
 
-	public String getKeyWithSep() {
-		return getKeyValue().getKey() + KeyValueFacet.SEP;
-	}
+        private final String base64Img;
+
+        public ValueInfo(Object value, String info)
+        {
+            this(value, info, null);
+        }
+
+        public ValueInfo(Object value, String info, String base64Img)
+        {
+            super();
+            this.value = value;
+            this.info = info;
+            this.base64Img = base64Img;
+        }
+
+        public Object getValue()
+        {
+            return value;
+        }
+
+        private String getInfo()
+        {
+            return info;
+        }
+
+        private String getBase64Img()
+        {
+            return base64Img;
+        }
+    }
 }

@@ -246,7 +246,7 @@ public class JavaDocParser {
 
 	/**
 	 * <pre>
-	 * "<" ident w* attrs "/"? ">"
+	 * "&lt;" ident w* attrs "/"? "&gt;"
 	 * </pre>
 	 */
 	public HtmlTagStartNode htmlTagStart() {
