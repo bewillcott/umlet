@@ -621,8 +621,8 @@ public abstract class CustomElement extends OldGridElement
         }
     }
 
-    @CustomFunction(param_defaults = "backgroundColor, transparency")
-    protected final void setBackgroundColor(String bgColorString, int transparency)
+    @CustomFunction(param_defaults = "backgroundColor, opacity")
+    protected final void setBackgroundColor(String bgColorString, int opacity)
     {
         // OldGridElements apply transparency for background explicitly, therefore don't apply it here
         tmpBgColor = Converter.convert(ThemeFactory.getCurrentTheme().forStringOrNull(bgColorString, Transparency.FOREGROUND));
@@ -632,16 +632,16 @@ public abstract class CustomElement extends OldGridElement
             tmpBgColor = bgColor; // unknown colors resolve to default color
         }
 
-        // Transparency Range 0% to 100%
-        if (transparency <= 0)
+        // Opacity Range 0% to 100%
+        if (opacity >= 100)
         {
             tmpAlpha = OldGridElement.ALPHA_NO_TRANSPARENCY;
-        } else if (transparency >= 100)
+        } else if (opacity <= 0)
         {
             tmpAlpha = OldGridElement.ALPHA_FULL_TRANSPARENCY;
         } else
         {
-            tmpAlpha = (100 - transparency) / 100.0f;
+            tmpAlpha = opacity / 100.0f;
         }
     }
 
